@@ -59,19 +59,18 @@ layer_state_t layer_state_set_user(layer_state_t state) {
   return update_tri_layer_state(state, _LOWER, _RAISE, _ADJUST);
 }
 
-//SSD1306 OLED update loop, make sure to enable OLED_ENABLE=yes in rules.mk
+// SSD1306 OLED update loop, make sure to enable OLED_ENABLE=yes in rules.mk
 #ifdef OLED_ENABLE
 
 oled_rotation_t oled_init_user(oled_rotation_t rotation) {
-  if (!is_keyboard_master())
-    return OLED_ROTATION_180;  // flips the display 180 degrees if offhand
+  if (!is_keyboard_master()) return OLED_ROTATION_180; // flips the display 180 degrees if offhand
   return rotation;
 }
 
 // When you add source files to SRC in rules.mk, you can use functions.
 const char *read_layer_state(void);
 const char *read_logo(void);
-void set_keylog(uint16_t keycode, keyrecord_t *record);
+void        set_keylog(uint16_t keycode, keyrecord_t *record);
 const char *read_keylog(void);
 const char *read_keylogs(void);
 
@@ -82,114 +81,114 @@ const char *read_keylogs(void);
 
 bool oled_task_user(void) {
   if (is_keyboard_master()) {
-    // If you want to change the display of OLED, you need to change here
-    oled_write_ln(read_layer_state(), false);
-    oled_write_ln(read_keylog(), false);
-    oled_write_ln(read_keylogs(), false);
-    //oled_write_ln(read_mode_icon(keymap_config.swap_lalt_lgui), false);
-    //oled_write_ln(read_host_led_state(), false);
-    //oled_write_ln(read_timelog(), false);
+      // If you want to change the display of OLED, you need to change here
+      oled_write_ln(read_layer_state(), false);
+      oled_write_ln(read_keylog(), false);
+      oled_write_ln(read_keylogs(), false);
+      // oled_write_ln(read_mode_icon(keymap_config.swap_lalt_lgui), false);
+      // oled_write_ln(read_host_led_state(), false);
+      // oled_write_ln(read_timelog(), false);
   } else {
-    oled_write(read_logo(), false);
+      oled_write(read_logo(), false);
   }
-    return false;
+  return false;
 }
 #endif // OLED_ENABLE
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 #ifdef OLED_ENABLE
-    if (record->event.pressed) {
-    set_keylog(keycode, record);
-    }
+  if (record->event.pressed) {
+      set_keylog(keycode, record);
+  }
 #endif
 
-    uint8_t mods    = get_mods() | get_oneshot_mods();
-    bool    shifted = mods & MOD_MASK_SHIFT;
+  uint8_t mods    = get_mods() | get_oneshot_mods();
+  bool    shifted = mods & MOD_MASK_SHIFT;
 
-    switch (keycode) {
-    //
-    // Å / å
-    //
-    case MAC_ARING:
-        if (!record->event.pressed) return false;
+  switch (keycode) {
+      //
+      // Å / å
+      //
+      case MAC_ARING:
+          if (!record->event.pressed) return false;
 
-        if (shifted) {
-            // Temporarily remove Shift to avoid interfering with the output
-            del_mods(MOD_MASK_SHIFT);
-            del_oneshot_mods(MOD_MASK_SHIFT);
+          if (shifted) {
+              // Temporarily remove Shift to avoid interfering with the output
+              del_mods(MOD_MASK_SHIFT);
+              del_oneshot_mods(MOD_MASK_SHIFT);
 
-            // Option+Shift+A → Å
-            register_code(KC_LALT);
-            register_code(KC_LSFT);
-            tap_code(KC_A);
-            unregister_code(KC_LSFT);
-            unregister_code(KC_LALT);
+              // Option+Shift+A → Å
+              register_code(KC_LALT);
+              register_code(KC_LSFT);
+              tap_code(KC_A);
+              unregister_code(KC_LSFT);
+              unregister_code(KC_LALT);
 
-            // Restore mods
-            set_mods(mods);
-        } else {
-            // Option+A → å
-            register_code(KC_LALT);
-            tap_code(KC_A);
-            unregister_code(KC_LALT);
-        }
-        return false;
+              // Restore mods
+              set_mods(mods);
+          } else {
+              // Option+A → å
+              register_code(KC_LALT);
+              tap_code(KC_A);
+              unregister_code(KC_LALT);
+          }
+          return false;
 
-    //
-    // Ä / ä
-    //
-    case MAC_ADIA:
-        if (!record->event.pressed) return false;
+      //
+      // Ä / ä
+      //
+      case MAC_ADIA:
+          if (!record->event.pressed) return false;
 
-        // Remove Shift before dead key! (fixes “¨A”)
-        del_mods(MOD_MASK_SHIFT);
-        del_oneshot_mods(MOD_MASK_SHIFT);
+          // Remove Shift before dead key! (fixes “¨A”)
+          del_mods(MOD_MASK_SHIFT);
+          del_oneshot_mods(MOD_MASK_SHIFT);
 
-        // Option+U (dead diaeresis)
-        register_code(KC_LALT);
-        tap_code(KC_U);
-        unregister_code(KC_LALT);
+          // Option+U (dead diaeresis)
+          register_code(KC_LALT);
+          tap_code(KC_U);
+          unregister_code(KC_LALT);
 
-        // Restore Shift if needed
-        if (shifted) {
-            register_code(KC_LSFT);
-            tap_code(KC_A); // Ä
-            unregister_code(KC_LSFT);
-        } else {
-            tap_code(KC_A); // ä
-        }
+          // Restore Shift if needed
+          if (shifted) {
+              register_code(KC_LSFT);
+              tap_code(KC_A); // Ä
+              unregister_code(KC_LSFT);
+          } else {
+              tap_code(KC_A); // ä
+          }
 
-        // Restore original mods
-        set_mods(mods);
-        return false;
+          // Restore original mods
+          set_mods(mods);
+          return false;
 
-    //
-    // Ö / ö
-    //
-    case MAC_ODIA:
-        if (!record->event.pressed) return false;
+      //
+      // Ö / ö
+      //
+      case MAC_ODIA:
+          if (!record->event.pressed) return false;
 
-        // Remove Shift before dead key (fixes “¨O”)
-        del_mods(MOD_MASK_SHIFT);
-        del_oneshot_mods(MOD_MASK_SHIFT);
+          // Remove Shift before dead key (fixes “¨O”)
+          del_mods(MOD_MASK_SHIFT);
+          del_oneshot_mods(MOD_MASK_SHIFT);
 
-        // Option+U (dead diaeresis)
-        register_code(KC_LALT);
-        tap_code(KC_U);
-        unregister_code(KC_LALT);
+          // Option+U (dead diaeresis)
+          register_code(KC_LALT);
+          tap_code(KC_U);
+          unregister_code(KC_LALT);
 
-        // Restore Shift if needed
-        if (shifted) {
-            register_code(KC_LSFT);
-            tap_code(KC_O); // Ö
-            unregister_code(KC_LSFT);
-        } else {
-            tap_code(KC_O); // ö
-        }
+          // Restore Shift if needed
+          if (shifted) {
+              register_code(KC_LSFT);
+              tap_code(KC_O); // Ö
+              unregister_code(KC_LSFT);
+          } else {
+              tap_code(KC_O); // ö
+          }
 
-        // Restore original mods
-        set_mods(mods);
-        return false;
-    }
+          // Restore original mods
+          set_mods(mods);
+          return false;
+  }
 
-    return true;
+  return true;
 }
